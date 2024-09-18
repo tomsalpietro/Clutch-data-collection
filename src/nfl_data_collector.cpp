@@ -1,6 +1,7 @@
 #include "nfl_data_collector.h"
 #include <iostream>
 #include <curl/curl.h>
+#include <nlohmann/json.hpp>
 
 // Callback function for handling data received via cURL
 size_t WriteCallback(void* contents, size_t size, size_t nmemb, void* userp) {
@@ -33,4 +34,33 @@ void NFLDataCollector::fetchPlayerData() {
 
         curl_easy_cleanup(curl);
     }
+}
+
+std::string NFLDataCollector::fetchTeamData() {
+    CURL* curl;
+    CURLcode res;
+    std::string readBuffer;
+
+    curl = curl_easy_init();
+    if(curl) {
+        curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "GET");
+        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
+        curl_easy_setopt(curl, CURLOPT_WRITEDATA, &readBuffer);
+        curl_easy_setopt(curl, CURLOPT_URL, "https://api.sportradar.com/nfl/official/trial/v7/en/league/teams.json?api_key=w2kPpAqMpmUkQgw2I9HnT1pr7iqQfKAmZlQ7ArJr");
+
+        struct curl_slist *headers = NULL;
+        headers = curl_slist_append(headers, "accept: application/json");
+        curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+
+        res = curl_easy_perform(curl);
+        
+        if(res != CURLE_OK)
+            fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
+
+        //std::cout << "Data fetched: " << readBuffer << std::endl;
+
+        curl_easy_cleanup(curl);
+        return readBuffer;   
+    }
+    return 0;
 }

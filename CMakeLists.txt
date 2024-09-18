@@ -12,6 +12,10 @@ add_executable(clutch_data_collector
 
 # Link libraries if needed later (e.g., libcurl)
 find_package(CURL REQUIRED)
+find_package(nlohmann_json REQUIRED)
+
 target_link_libraries(clutch_data_collector
     CURL::libcurl
+    nlohmann_json::nlohmann_json
 )
+
